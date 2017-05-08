@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_ng_template">
+    <sp_ng_template action="INSERT_OR_UPDATE">
+        <id>hackathon-list-detail.html</id>
+        <sp_widget display_value="Registration List">567a6d961d2632007f440058366be873</sp_widget>
+        <sys_class_name>sp_ng_template</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-05-08 13:27:30</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>fc2795ea1de632007f440058366be848</sys_id>
+        <sys_mod_count>14</sys_mod_count>
+        <sys_name>hackathon-list-detail.html</sys_name>
+        <sys_package display_value="Hackathon Portal" source="x_snc_hackathon_po">7d96e1561d2632007f440058366be825</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Hackathon Portal">7d96e1561d2632007f440058366be825</sys_scope>
+        <sys_update_name>sp_ng_template_fc2795ea1de632007f440058366be848</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-05-08 14:37:32</sys_updated_on>
+        <template><![CDATA[<div>
+    <div class="modal-header">
+        <div class="modal-title pull-left h3">{{mc.modalTitle}}</div>
+        <div class="pull-right modal-title h3"><span style="cursor:pointer" ng-click="mc.closeModal()">&times;</span></div>
+    </div>
+    <div class="modal-body" id="modal-body">
+       
+      <sp-widget widget="mc.widget"></sp-widget>
+     
+    </div>
+  </div>
+]]></template>
+    </sp_ng_template>
+</record_update>

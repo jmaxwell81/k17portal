@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <client_script><![CDATA[function($scope, $location, spUtil, $uibModal, $timeout) {
+    /* widget controller */
+    var c = this;
+
+    spUtil.recordWatch($scope, "u_hackathon_registration", "", function(name, data) {
+        spUtil.update($scope);
+    });
+    //pagination
+    $scope.$watch("data.current_page", function(val, old) {
+        if (val == old)
+            return;
+        c.data.disable_pagination = true;
+        $location.search({
+            id: $location.search().id,
+            p: val
+        })
+    });
+
+    $scope.$on('sp.form.record.updated', function() {
+        $timeout(function() {
+            c.closeModal();
+        }, 2000);
+    });
+
+    c.isInView = function(index, inview, inviewpart) {
+        if (c.data.max_entries > c.data.total_items)
+            return;
+        c.loadingMore = true;
+        c.data.max_entries = c.data.max_entries + 10;
+        spUtil.update($scope).then(function() {
+            c.loadingMore = false;
+        });
+    };
+
+    c.closeModal = function() {
+        if (c.modalInstance)
+            c.modalInstance.close();
+    };
+
+    c.openDetail = function(reg) {
+        console.log(reg);
+        console.log(reg.u_first_name);
+        c.modalInstance = $uibModal.open({
+            templateUrl: "hackathon-list-detail.html",
+            controllerAs: "mc",
+            controller: function() {
+                var mc = this;
+
+                mc.closeModal = function() {
+                    c.closeModal();
+                };
+
+                mc.reg = reg;
+                mc.fullName = reg.u_first_name + ' ' + reg.u_last_name; //user's first name plus last name. e.g. Dan Conroy;
+                mc.modalTitle = mc.fullName + "'s Hackathon Registration"; //modal heading e.g. Dan Conroy's Hackathon Registration;
+                spUtil.get("widget-form", {
+
+                    table: 'u_hackathon_registration',
+                    sys_id: reg.sys_id
+
+                }).then(function(r) {
+
+                    mc.widget = r;
+                    /* Assign the response to mc.widget */
+
+                });
+
+            }
+
+        });
+    }
+}
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css/>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>registration_list</id>
+        <internal>false</internal>
+        <link/>
+        <name>Registration List</name>
+        <option_schema>[{"hint":"Enable this option to use infinite scrolling rather than the default pagination.","name":"infinite_scroll","default_value":"false","label":"Infinite Scroll","type":"boolean"}]</option_schema>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    /*pagination changes start*/
+    //max number of entries to show at once
+    data.max_entries = 10;
+    
+		if(input && input.max_entries) {
+		 data.max_entries = input.max_entries;
+		}
+	
+	  //which page to start on
+    data.current_page = $sp.getParameter('p') || 1;
+    //what is the first item we can see?
+    data.first_shown = ((data.current_page - 1) * data.max_entries) + 1;
+    /*pagination changes end*/
+    data.registrations = [];
+    data.fields = ["u_first_name", "u_last_name", "u_email", "u_company", "u_event", "u_comments", "u_state", "sys_created_on"];
+    data.labels = [];
+    var regGR = new GlideRecord("u_hackathon_registration");
+    data.labels = $sp.getFields(regGR, data.fields);
+    regGR.orderByDesc('sys_created_on');
+    /*pagination changes start*/
+    regGR.chooseWindow(data.first_shown - 1, data.first_shown + data.max_entries - 1); //add the - 1 here as chooseWindow starts counting from 0
+    /*pagination changes end*/
+    regGR.query();
+
+    while (regGR.next()) {
+        var reg = {};
+        $sp.getRecordDisplayValues(reg, regGR, data.fields.toString());
+        $sp.getRecordValues(reg, regGR, 'sys_id');
+        data.registrations.push(reg);
+    }
+    /*pagination changes start*/
+    var total = new GlideAggregate("u_hackathon_registration");
+    total.addAggregate("COUNT");
+    total.query();
+    total.next();
+    data.total_items = total.getAggregate("COUNT");
+    data.disable_pagination = false;
+
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-05-07 20:11:10</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>567a6d961d2632007f440058366be873</sys_id>
+        <sys_mod_count>69</sys_mod_count>
+        <sys_name>Registration List</sys_name>
+        <sys_package display_value="Hackathon Portal" source="x_snc_hackathon_po">7d96e1561d2632007f440058366be825</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Hackathon Portal">7d96e1561d2632007f440058366be825</sys_scope>
+        <sys_update_name>sp_widget_567a6d961d2632007f440058366be873</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-05-08 15:58:52</sys_updated_on>
+        <template><![CDATA[<div class="panel panel-default">
+    <form class="form-horizontal" name="registration" ng-submit="c.submitForm(registration.$valid)" role="form" novalidate>
+        <div class="panel-heading panel-title">${Hackathon Registration}</div>
+        <div class="panel-body">
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th ng-repeat="label in c.data.labels | limitTo: 3">{{label.label}}</th>
+                            <th></th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="reg in c.data.registrations">
+                            <td ng-repeat="field in c.data.fields | limitTo: 3">{{reg[field]}}</td>
+                            <td><a href="" ng-click="c.openDetail(reg)">Details</a></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+              
+
+            <!-- Pagination -->
+              <div ng-if="c.options.infinite_scroll != 'true'" class="pull-right">
+                <ul uib-pagination boundary-links="true" items-per-page="c.data.max_entries" total-items="c.data.total_items" ng-model="c.data.current_page" class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" rotate="true"
+                    max-size="5" force-ellipses="true" ng-disabled="c.data.disable_pagination"></ul>
+                <p class="text-right">Showing {{c.data.first_shown}}-{{c.data.last_shown}} of {{c.data.total_items}}</p>
+             </div>
+          
+           
+            <div ng-if="c.options.infinite_scroll == 'true'">
+                 
+              <div ng-if="c.loadingMore == 'true'">
+                <i class="fa fa-circle-o-notch fa-spin center-block" style="font-size:24px"></i>
+              </div>
+              <div ng-if="c.loadingMore != 'true'">
+                 <div in-view="c.isInView($index, $inview, $inviewpart)">&nbsp;</div>
+              </div>
+               
+            </div>
+
+           <!-- <div class="panel-footer"></div> -->
+        </div>
+    </form>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <client_script><![CDATA[function($timeout, $location) {
+    var c = this;
+
+    c.submitForm = function(isValid) {
+        c.submitted = true;
+
+        if (!isValid) return;
+        //Write variables into the data object
+        c.data.first_name = c.first_name;
+        c.data.last_name = c.last_name;
+        c.data.email = c.email;
+        c.data.company = c.company;
+        c.data.event = c.select_event;
+        c.data.eventSysId = c.select_event.sys_id;
+        c.data.comments = c.comments || '';
+
+        c.server.update().then(function(response) {
+
+            if (response.status == 'success') {
+
+                c.message = null; //Hides the error message
+                c.success = response.message;
+
+                $timeout(function() {
+                    $location.search({
+                        id: 'hackathon_reg_list'
+                    });
+                }, 5000);
+            } else if (response.status == 'error') {
+                c.message = response.message;
+            }
+        });
+    }
+}
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css/>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>registration_form</id>
+        <internal>false</internal>
+        <link/>
+        <name>Registration Form</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    /* populate the 'data' object */
+    /* e.g., data.table = $sp.getValue('table'); */
+
+    if (!input) {
+        var events = [];
+        var grEvent = new GlideRecord("u_hackathon_event");
+        //addActiveQuery() will not work since the field on the table is called u_active /* grEvent.addActiveQuery(); */
+        grEvent.addQuery("u_active", true);
+        grEvent.query();
+        while (grEvent.next()) {
+            events.push({
+                "name": grEvent.getDisplayValue("u_event_name"),
+                "sys_id": grEvent.getUniqueValue()
+            });
+        }
+        //make events available to the client
+        data.events = events;
+    }
+
+    /* Only execute when we have form input */
+    if (input) {
+        if (validateRegistration(input.email)) {
+            var grHackathonReg = new GlideRecord('u_hackathon_registration');
+            grHackathonReg.initialize();
+            grHackathonReg.setValue('u_first_name', input.first_name);
+            grHackathonReg.setValue('u_last_name', input.last_name);
+            grHackathonReg.setValue('u_email', input.email);
+            grHackathonReg.setValue('u_company', input.company);
+            grHackathonReg.setValue('u_event', input.eventSysId);
+            grHackathonReg.setValue('u_state', 'pending');
+            grHackathonReg.setValue('u_comments', input.comments);
+            var userRegSysId = grHackathonReg.insert();
+            if (!gs.nil(userRegSysId)) {
+                data.status = "success";
+                data.message = gs.getMessage("Your registration has been submitted. You will be redirected to the homepage in a few seconds. If you are not being redirected click on the Logo and you will get back to the homepage.");
+            } else {
+                data.status = "error";
+            }
+        }
+        return data;
+    }
+
+})();
+
+function validateRegistration(email) {
+    var isNoDuplicate = true;
+    //abort if registration already exists
+    if (registrationExists(email)) {
+        data.message = gs.getMessage("There is already a pending registration request for that email address. Please pick another one or reset your password via the 'Login' form.");
+        data.status = "error";
+        isNoDuplicate = false;
+    }
+    return isNoDuplicate;
+}
+
+function registrationExists(email) {
+    var reg = new GlideRecord("u_hackathon_registration");
+    reg.addQuery("u_email", email);
+    reg.addQuery("u_state", "pending");
+    reg.query();
+    return reg.hasNext();
+}
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-05-07 20:04:29</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>94f865961d2632007f440058366be872</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Registration Form</sys_name>
+        <sys_package display_value="Hackathon Portal" source="x_snc_hackathon_po">7d96e1561d2632007f440058366be825</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Hackathon Portal">7d96e1561d2632007f440058366be825</sys_scope>
+        <sys_update_name>sp_widget_94f865961d2632007f440058366be872</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-05-07 20:07:12</sys_updated_on>
+        <template><![CDATA[<div class="panel panel-default">
+  <form class="form-horizontal" name="registration" ng-submit="c.submitForm(registration.$valid)" role="form" novalidate>
+    <div class="panel-heading panel-title">${Hackathon Registration}</div>
+    <div class="panel-body">
+
+      <!-- Messages -->
+      <div ng-if="c.message" id="errorMessage" class="alert alert-danger" role="alert">{{c.message}}</div>
+      <div ng-if="c.success" id="successMessage" class="alert alert-success" role="alert">{{c.success}}</div>
+
+      <fieldset>
+        <!-- First Name -->
+        <div class="form-group" ng-class="{ 'has-error' : registration.first_name.$invalid && c.submitted }">
+          <div class="col-md-12">
+            <input ng-model="c.first_name" id="first_name" name="first_name" type="text" placeholder="First Name" class="form-control input-md" ng-required="true">
+            <p ng-show="registration.first_name.$invalid && c.submitted" class="help-block">${Your First Name is required.}</p>
+          </div>
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group" ng-class="{ 'has-error' : registration.last_name.$invalid && c.submitted }">
+          <div class="col-md-12">
+            <input ng-model="c.last_name" id="last_name" name="last_name" type="text" placeholder="Last Name" class="form-control input-md" ng-required="true">
+            <p ng-show="registration.last_name.$invalid && c.submitted" class="help-block">${Your Last Name is required.}</p>
+          </div>
+        </div>
+
+        <!-- Company -->
+        <div class="form-group" ng-class="{ 'has-error' : registration.company.$invalid && c.submitted }">
+          <div class="col-md-12">
+            <input ng-model="c.company" id="company" name="company" type="text" placeholder="Company" class="form-control input-md" ng-required="true">
+            <p ng-show="registration.company.$invalid && c.submitted" class="help-block">${Your Company is required.}</p>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group" ng-class="{ 'has-error' : registration.email.$invalid && c.submitted }">
+          <div class="col-md-12">
+            <input ng-model="c.email" id="email" name="email" type="text" placeholder="Email" class="form-control input-md" ng-required="true">
+            <p ng-show="registration.email.$invalid && c.submitted" class="help-block">${Your Email is required.}</p>
+          </div>
+        </div>
+
+        <!-- Event -->
+        <div class="form-group" ng-class="{ 'has-error' : registration.select_event.$invalid && c.submitted }">
+          <div class="col-md-12">
+            <select ng-model="c.select_event" id="select_event" name="select_event" class="form-control" ng-required="true" ng-options="event.name for event in c.data.events">
+				      <option value="" disabled selected> -- Select Event -- </option>
+				    </select>
+            <p ng-show="registration.select_event.$invalid && c.submitted" class="help-block">${An event is required.}</p>
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="form-group" ng-class="{ 'has-error' : registration.comments.$invalid && c.submitted }">
+          <div class="col-md-12">
+            <textarea ng-model="c.comments" id="comments" name="comments" placeholder="Comments" class="form-control input-md"></textarea ng-required="true">
+			  </div>
+			</div>
+
+			</fieldset>
+		</div>
+		<div class="panel-footer"><button class="btn btn-default" type="submit">${Submit}</button></div>
+	</form>
+</div>]]></template>
+    </sp_widget>
+</record_update>
