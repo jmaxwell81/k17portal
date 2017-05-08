@@ -82,7 +82,7 @@
         <docs/>
         <field_list/>
         <has_preview>false</has_preview>
-        <id>registration_list</id>
+        <id>registration-list</id>
         <internal>false</internal>
         <link/>
         <name>Registration List</name>
@@ -136,7 +136,7 @@
         <sys_created_on>2017-05-07 20:11:10</sys_created_on>
         <sys_customer_update>true</sys_customer_update>
         <sys_id>567a6d961d2632007f440058366be873</sys_id>
-        <sys_mod_count>69</sys_mod_count>
+        <sys_mod_count>71</sys_mod_count>
         <sys_name>Registration List</sys_name>
         <sys_package display_value="Hackathon Portal" source="x_snc_hackathon_po">7d96e1561d2632007f440058366be825</sys_package>
         <sys_policy/>
@@ -144,7 +144,7 @@
         <sys_scope display_value="Hackathon Portal">7d96e1561d2632007f440058366be825</sys_scope>
         <sys_update_name>sp_widget_567a6d961d2632007f440058366be873</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2017-05-08 15:58:52</sys_updated_on>
+        <sys_updated_on>2017-05-08 19:27:30</sys_updated_on>
         <template><![CDATA[<div class="panel panel-default">
     <form class="form-horizontal" name="registration" ng-submit="c.submitForm(registration.$valid)" role="form" novalidate>
         <div class="panel-heading panel-title">${Hackathon Registration}</div>
@@ -156,13 +156,16 @@
                         <tr>
                             <th ng-repeat="label in c.data.labels | limitTo: 3">{{label.label}}</th>
                             <th></th>
-
+							 <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="reg in c.data.registrations">
                             <td ng-repeat="field in c.data.fields | limitTo: 3">{{reg[field]}}</td>
                             <td><a href="" ng-click="c.openDetail(reg)">Details</a></td>
+                          <td>
+                            <hackathon-list-delete sys-id="reg.sys_id" display-name="reg.u_first_name + ' ' + reg.u_last_name"></hackathon-list-delete>
+                           </td>
                         </tr>
 
                     </tbody>

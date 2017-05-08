@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <record_update table="m2m_sp_ng_pro_sp_widget">
     <m2m_sp_ng_pro_sp_widget action="INSERT_OR_UPDATE">
-        <sp_angular_provider display_value=" hackathonListDelete">17f05ee61d2a32007f440058366be8fc</sp_angular_provider>
+        <sp_angular_provider display_value="hackathonListDelete">17f05ee61d2a32007f440058366be8fc</sp_angular_provider>
         <sp_widget display_value="Registration List">567a6d961d2632007f440058366be873</sp_widget>
         <sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name>
         <sys_created_by>admin</sys_created_by>
